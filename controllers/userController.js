@@ -2,6 +2,7 @@ import userModel from "../models/userModel.js";
 import validator from "validator";
 import JWT from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { createError, createSuccess } from "../config/response.js";
 
 export const createToken = (id) => {
   return JWT.sign({ id }, process.env.TOKEN);
@@ -71,4 +72,18 @@ export const signInUser = async (req, res) => {
 };
 
 // ADmin login
-export const adminLogin = async (req, res) => {};
+export const adminLogin = async (req, res) => {
+     try {
+       const {email , password} = req.body
+      if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
+        const token = JWT.sign(email+password , process.env.TOKEN_ADMIN)
+       res.send({success : true , token})
+      }
+      else{
+        res.send({success : true , message : 'Invalid Condetionals'})
+        
+      }
+     } catch (error) {
+      createError(false , error.message)
+     }
+};
