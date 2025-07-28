@@ -9,29 +9,26 @@ export const createToken = (id) => {
 };
 
 export const loginUser = async (req, res) => {
-
-   try {
-     const {email , password} = req.body;
-    let user = await userModel.findOne({email})
+  try {
+    const { email, password } = req.body;
+    let user = await userModel.findOne({ email });
     if (!user) {
-        res.json({sucess : false , message : 'this email doesnt exist '})
+      res.json({ success: false, message: "this email doesnt exist " });
     }
 
-    let isMatch = await bcrypt.compare(password , user.password)
+    let isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-        res.json({sucess : false , message : 'Invalid Condetionals '})
-    }else if (isMatch && user){
-        const token = createToken(user._id) 
-        res.json({sucess : true ,token})
-
+      res.json({ sucess: false, message: "Invalid Condetionals " });
+    } else if (isMatch && user) {
+      const token = createToken(user._id);
+      res.json({ success: true, token });
     }
-   } catch (error) {
+  } catch (error) {
     console.log(error);
-    
-    res.send({success : false , message : error.message})
-   }
 
+    res.send({ success: false, message: error.message });
+  }
 };
 
 // user registration
@@ -73,17 +70,27 @@ export const signInUser = async (req, res) => {
 
 // ADmin login
 export const adminLogin = async (req, res) => {
-     try {
-       const {email , password} = req.body
-      if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-        const token = JWT.sign(email+password , process.env.TOKEN_ADMIN)
-       res.send({success : true , token})
-      }
-      else{
-        res.send({success : true , message : 'Invalid Condetionals'})
-        
-      }
-     } catch (error) {
-      createError(false , error.message)
-     }
+  try {
+    const { email, password } = req.body;
+
+    if (
+      email !== process.env.ADMIN_EMAIL ||
+      password !== process.env.ADMIN_PASSWORD
+    ) {
+      return res.send({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = JWT.sign(
+      email + password,
+      process.env.TOKEN_ADMIN // ✅ make sure this is defined
+    );
+
+    return res.send({
+      success: true,
+      token, // ✅ yeh zaroor bhejna hai
+      message: "Login successful",
+    });
+  } catch (error) {
+    res.send({ success: false, message: error.message });
+  }
 };

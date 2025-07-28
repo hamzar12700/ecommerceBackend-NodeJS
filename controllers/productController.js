@@ -29,7 +29,7 @@ export const addProduct = async (req, res) => {
     try {
       parsedSizes = JSON.parse(sizes);
     } catch (e) {
-      return res.status(400).json({ success: false, message: "Invalid sizes format" });
+      return res.status(400).json({ success: false, message: "Invalid sizes format" , error : e.message  });
     }
 
     const productData = {
@@ -65,15 +65,29 @@ export const listProduct = async(req,res)=>{
   }
 }
 
-export const removeProduct = async (req,res)=>{
-      try {
-         const {productId} = req.body
-     let product = await productModel.findByIdAndDelete(productId);
-    res.send({success : true , product })
+export const removeProduct = async (req, res) => {
+  try {
+    console.log("🔥 Headers:", req.headers);
+    console.log("🔥 Body:", req.body);
+
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({ success: false, message: "Product ID missing" });
+    }
+
+    const product = await productModel.findByIdAndDelete(productId);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({ success: true, message: "Deleted", product });
   } catch (error) {
-    res.send({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
-}
+};
+
 
 export const singleProduct = async (req,res)=>{
           try {
